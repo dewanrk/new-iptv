@@ -12,6 +12,60 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var webView: WebView
 
+    private val customCss = """
+        * { box-sizing: border-box !important; }
+        html, body {
+            width: 100% !important;
+            overflow-x: hidden !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+        header { text-align: center !important; padding: 4px 0 !important; }
+        .ifream {
+            position: relative !important;
+            display: block !important;
+            float: none !important;
+            width: 100% !important;
+            height: 56vw !important;
+            max-height: 260px !important;
+            border: none !important;
+            margin: 0 auto !important;
+        }
+        .owl-filter, .container-fluid, .custom_fluid {
+            width: 100% !important;
+            max-width: 100% !important;
+            padding: 0 8px !important;
+            float: none !important;
+            overflow: visible !important;
+        }
+        .filter-item {
+            display: flex !important;
+            flex-wrap: wrap !important;
+            justify-content: center !important;
+            width: 100% !important;
+        }
+        .filter-item .item {
+            width: 30% !important;
+            margin: 1.5% !important;
+            float: none !important;
+        }
+        .filter-item .item img {
+            width: 100% !important;
+            height: auto !important;
+        }
+        .filter-menu ul {
+            display: flex !important;
+            flex-wrap: wrap !important;
+            justify-content: center !important;
+            padding: 4px !important;
+            margin: 0 !important;
+        }
+        .filter-menu ul li {
+            margin: 3px !important;
+            font-size: 12px !important;
+        }
+    """.trimIndent()
+
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,13 +87,11 @@ class MainActivity : AppCompatActivity() {
             displayZoomControls = false
         }
 
-        // পুরো পেজটা একটু জুম-আউট করে শুরু হবে, যাতে লেআউট বেশি এলোমেলো না লাগে
-        webView.setInitialScale(80)
-
         webView.webViewClient = object : WebViewClient() {
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
-                val js = """
+
+                val viewportJs = """
                     (function() {
                         var meta = document.querySelector('meta[name="viewport"]');
                         if (!meta) {
@@ -50,7 +102,17 @@ class MainActivity : AppCompatActivity() {
                         meta.content = 'width=device-width, initial-scale=1.0, maximum-scale=3.0, user-scalable=yes';
                     })();
                 """.trimIndent()
-                view?.evaluateJavascript(js, null)
+                view?.evaluateJavascript(viewportJs, null)
+
+                val cssJs = """
+                    (function() {
+                        var style = document.createElement('style');
+                        style.type = 'text/css';
+                        style.innerHTML = `$customCss`;
+                        document.head.appendChild(style);
+                    })();
+                """.trimIndent()
+                view?.evaluateJavascript(cssJs, null)
             }
         }
         webView.webChromeClient = WebChromeClient()
