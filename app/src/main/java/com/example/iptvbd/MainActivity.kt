@@ -29,11 +29,30 @@ class MainActivity : AppCompatActivity() {
             mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
             allowFileAccess = true
             allowContentAccess = true
-            builtInZoomControls = false
+            builtInZoomControls = true
             displayZoomControls = false
         }
 
-        webView.webViewClient = WebViewClient()
+        // পুরো পেজটা একটু জুম-আউট করে শুরু হবে, যাতে লেআউট বেশি এলোমেলো না লাগে
+        webView.setInitialScale(80)
+
+        webView.webViewClient = object : WebViewClient() {
+            override fun onPageFinished(view: WebView?, url: String?) {
+                super.onPageFinished(view, url)
+                val js = """
+                    (function() {
+                        var meta = document.querySelector('meta[name="viewport"]');
+                        if (!meta) {
+                            meta = document.createElement('meta');
+                            meta.name = 'viewport';
+                            document.getElementsByTagName('head')[0].appendChild(meta);
+                        }
+                        meta.content = 'width=device-width, initial-scale=1.0, maximum-scale=3.0, user-scalable=yes';
+                    })();
+                """.trimIndent()
+                view?.evaluateJavascript(js, null)
+            }
+        }
         webView.webChromeClient = WebChromeClient()
 
         // আপনার ওয়েবসাইটের লিংক
